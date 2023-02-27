@@ -17,6 +17,13 @@ class PostConstant {
     }
   }
 
+  Future<void> deleteLastPost() async {
+    var postBox = Hive.box<PostInfo>(postList);
+    if (postBox.values.isNotEmpty) {
+      postBox.values.last.delete();
+    }
+  }
+
   Future<void> getPostData() async {
     final response =
         await http.get(Uri.parse("https://jsonplaceholder.typicode.com/posts"));

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:providerhive/ChangeScreenProvider.dart';
 import 'package:providerhive/database/PostConstant.dart';
 import 'package:providerhive/database/models/post_info_model.dart';
+import 'package:uuid/uuid.dart';
 
 Future<void> main() async {
   await Hive.initFlutter();
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Hive/Provider'),
     );
   }
 }
@@ -51,7 +52,33 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(title: Text(widget.title), actions: [
+        InkWell(
+          onTap: () {
+            PostConstant().storePostList(PostInfo(
+                id: DateTime.now().millisecondsSinceEpoch,
+                userId: DateTime.now().millisecondsSinceEpoch,
+                body: "Dummy body here ${Uuid().v4()}",
+                title: "Dummy Title Add ${Uuid().v4()}"));
+          },
+          child: const Center(
+              child: Text(
+            "Dummy\nAdd",
+            textAlign: TextAlign.center,
+          )),
+        ),
+        const SizedBox(width: 16),
+        InkWell(
+          onTap: () {
+            PostConstant().deleteLastPost();
+          },
+          child: const Center(
+              child: Text(
+            "Delete\nLast",
+            textAlign: TextAlign.center,
+          )),
+        )
+      ]),
       body: SafeArea(
         child: ValueListenableBuilder(
           valueListenable: Hive.box<PostInfo>(postList).listenable(),
@@ -59,10 +86,15 @@ class _MyHomePageState extends State<MyHomePage> {
             final listOfPost = value.values.toList().cast<PostInfo>();
             return ListView.builder(
               itemCount: listOfPost != null ? listOfPost.length : 0,
-              itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: listItem(listOfPost[index]),
-              ),
+              reverse: true,
+              itemBuilder: (context, index) {
+                final reversedIndex = listOfPost.length - 1 - index;
+                final item = listOfPost[reversedIndex];
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: listItem(item),
+                );
+              },
             );
           },
         ),
